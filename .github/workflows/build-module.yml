@@ -1,0 +1,52 @@
+name: Build AI Module
+
+on:
+  schedule:
+    - cron: '0 1 * * *'   # UTC 01:00 = 北京时间 09:00
+  workflow_dispatch:       # 支持手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate Module
+        run: |
+          python3 << 'PY'
+          import urllib.request
+
+          url = "https://raw.githubusercontent.com/VPSDance/ai-proxy-rules/main/rules/shadowrocket/global.list"
+          content = urllib.request.urlopen(url).read().decode("utf-8")
+
+          rules = []
+          for line in content.splitlines():
+              line = line.strip()
+              if not line or line.startswith("#") or line.startswith("PROCESS-NAME,"):
+                  continue
+              if ",PROXY" not in line and ",DIRECT" not in line:
+                  if "no-resolve" in line:
+                      line += ",PROXY"
+                  else:
+                      line += ",PROXY"
+              rules.append(line)
+
+          header = """#!name=AI Rules
+          #!desc=VPSDance AI 分流规则（自动同步）
+          #!author=Auto-generated
+          #!homepage=https://github.com/VPSDance/ai-proxy-rules
+
+          """
+          open("AI-Rules.module", "w").write(header + "\n".join(rules) + "\n")
+          print(f"Generated {len(rules)} rules")
+          PY
+
+      - name: Commit and Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add AI-Rules.module
+          git diff --staged --quiet || git commit -m "chore: update AI module"
+          git push
