@@ -3,6 +3,7 @@
 #!author=Auto-generated
 #!homepage=https://github.com/VPSDance/ai-proxy-rules
 
+[Rule]
 DOMAIN-SUFFIX,firefly.adobe.com,PROXY
 DOMAIN-SUFFIX,firefly.adobe.io,PROXY
 DOMAIN,aws-language-servers.us-east-1.amazonaws.com,PROXY
