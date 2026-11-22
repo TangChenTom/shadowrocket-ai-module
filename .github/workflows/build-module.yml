@@ -3,7 +3,7 @@ name: Build AI Module
 on:
   schedule:
     - cron: '0 1 * * *'   # UTC 01:00 = 北京时间 09:00
-  workflow_dispatch:       # 支持手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -26,7 +26,7 @@ jobs:
               line = line.strip()
               if not line or line.startswith("#") or line.startswith("PROCESS-NAME,"):
                   continue
-              if ",PROXY" not in line and ",DIRECT" not in line:
+              if ",PROXY" not in line and ",DIRECT" not in line and ",REJECT" not in line:
                   if "no-resolve" in line:
                       line += ",PROXY"
                   else:
@@ -38,6 +38,7 @@ jobs:
           #!author=Auto-generated
           #!homepage=https://github.com/VPSDance/ai-proxy-rules
 
+          [Rule]
           """
           open("AI-Rules.module", "w").write(header + "\n".join(rules) + "\n")
           print(f"Generated {len(rules)} rules")
