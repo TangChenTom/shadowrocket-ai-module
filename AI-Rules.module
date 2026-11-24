@@ -191,6 +191,7 @@ DOMAIN-SUFFIX,flow.google,PROXY
 DOMAIN-SUFFIX,flow.google.com,PROXY
 DOMAIN-SUFFIX,geller-pa.googleapis.com,PROXY
 DOMAIN-SUFFIX,gemini.gstatic.com,PROXY
+DOMAIN-SUFFIX,gemma.ai,PROXY
 DOMAIN-SUFFIX,jules.google,PROXY
 DOMAIN-SUFFIX,jules.google.com,PROXY
 DOMAIN-SUFFIX,labs.google,PROXY
