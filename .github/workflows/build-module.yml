@@ -55,8 +55,8 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "No changes"
           else
-            # 优先获取 VPSDance 最新的 commit message
-            VPS_MSG=$(curl -s "https://api.github.com/repos/VPSDance/ai-proxy-rules/commits?per_page=1" | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['commit']['message'].split('\n')[0])" 2>/dev/null || echo "")
+            # 精确获取 global.list 的最新 commit message
+            VPS_MSG=$(curl -s "https://api.github.com/repos/VPSDance/ai-proxy-rules/commits?path=rules/shadowrocket/global.list&per_page=1" | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['commit']['message'].split('\n')[0])" 2>/dev/null || echo "")
             
             # 如果获取失败，用自己计算的
             if [ -z "$VPS_MSG" ] || [ "$VPS_MSG" = "null" ]; then
