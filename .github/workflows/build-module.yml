@@ -55,15 +55,35 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "No changes"
           else
+            # 优先获取 VPSDance 最新的 commit message
+            VPS_MSG=$(curl -s "https://api.github.com/repos/VPSDance/ai-proxy-rules/commits?per_page=1" | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['commit']['message'].split('\n')[0])" 2>/dev/null || echo "")
+            
+            # 如果获取失败，用自己计算的
+            if [ -z "$VPS_MSG" ] || [ "$VPS_MSG" = "null" ]; then
+              ADDED=$(git diff --staged --numstat -- AI-Rules.module | awk '{print $1}')
+              REMOVED=$(git diff --staged --numstat -- AI-Rules.module | awk '{print $2}')
+              
+              if [ "$ADDED" -gt 0 ] && [ "$REMOVED" -gt 0 ]; then
+                VPS_MSG="chore: update rules (+${ADDED} -${REMOVED})"
+              elif [ "$ADDED" -gt 0 ]; then
+                VPS_MSG="chore: add rules (+${ADDED})"
+              elif [ "$REMOVED" -gt 0 ]; then
+                VPS_MSG="chore: remove rules (-${REMOVED})"
+              else
+                VPS_MSG="chore: update AI module"
+              fi
+            fi
+            
             DIFF=$(git diff --staged -- AI-Rules.module | head -c 8000)
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "diff<<EOF" >> $GITHUB_OUTPUT
             echo "$DIFF" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
+            echo "message=$VPS_MSG" >> $GITHUB_OUTPUT
             
-            git commit -m "chore: update AI module"
+            git commit -m "$VPS_MSG"
             git push
-            echo "Changes committed and pushed"
+            echo "Changes committed and pushed: $VPS_MSG"
           fi
 
       - name: Send email if changed
