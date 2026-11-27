@@ -45,9 +45,43 @@ jobs:
           PY
 
       - name: Commit and Push
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add AI-Rules.module
-          git diff --staged --quiet || git commit -m "chore: update AI module"
-          git push
+          
+          if git diff --staged --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No changes"
+          else
+            DIFF=$(git diff --staged -- AI-Rules.module | head -c 8000)
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "diff<<EOF" >> $GITHUB_OUTPUT
+            echo "$DIFF" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            
+            git commit -m "chore: update AI module"
+            git push
+            echo "Changes committed and pushed"
+          fi
+
+      - name: Send email if changed
+        if: steps.commit.outputs.changed == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: AI-Rules.module 已更新
+          to: 1155124287cuhk@gmail.com
+          from: ${{ secrets.EMAIL_USERNAME }}
+          body: |
+            AI-Rules.module 有新变化，已自动更新。
+            
+            仓库：https://github.com/TangChenTom/shadowrocket-ai-module
+            提交：https://github.com/TangChenTom/shadowrocket-ai-module/commit/${{ github.sha }}
+            
+            变更内容（前 8000 字符）：${{ steps.commit.outputs.diff }}
